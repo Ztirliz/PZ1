@@ -29,6 +29,9 @@ public class Task2 {
         Map<Character, Integer> charCounts = new HashMap<>();
         Map<String, Integer> crossingBigramCounts = new HashMap<>();
         Map<String, Integer> nonCrossingBigramCounts = new HashMap<>();
+        List<Map.Entry<String, Integer>> toplist1 = new ArrayList<>();
+        List<Map.Entry<String, Integer>> toplist2 = new ArrayList<>();
+
         int count = 0;
         for (int i = 0; i < text.length() - 1; i++) {
             char c = text.charAt(i);
@@ -37,16 +40,16 @@ public class Task2 {
             }
             String bigram2 = "";
             String bigram1 = "";
-            if ((i+2)<=text.length()) {
+            if ((i + 2) <= text.length()) {
                 bigram1 = text.substring(i, i + 2);
             }
-            if ((count+2)<=text.length()) {
-               bigram2 = text.substring(count, count + 2);
+            if ((count + 2) <= text.length()) {
+                bigram2 = text.substring(count, count + 2);
             }
             count += 2;
 
-            for (int j =0;j<=1; j++){
-                if (bigram1.length()==2) {
+            for (int j = 0; j <= 1; j++) {
+                if (bigram1.length() == 2) {
                     char h1 = bigram1.charAt(j);
                     if (!Character.isAlphabetic(h1)) {
                         break;
@@ -56,7 +59,7 @@ public class Task2 {
                     }
                 }
             }
-            for (int j =0;j<=1;j++) {
+            for (int j = 0; j <= 1; j++) {
                 if (bigram2.length() == 2) {
                     char h2 = bigram2.charAt(j);
                     if (!Character.isAlphabetic(h2)) {
@@ -83,7 +86,7 @@ public class Task2 {
                                     Map.Entry::getValue,
                                     (e1, e2) -> e2,
                                     LinkedHashMap::new));
-           nonCrossingBigramCounts = nonCrossingBigramCounts.entrySet()
+            nonCrossingBigramCounts = nonCrossingBigramCounts.entrySet()
                     .stream()
                     .sorted(Map.Entry.comparingByValue(Collections.reverseOrder()))
                     .collect(Collectors
@@ -91,6 +94,8 @@ public class Task2 {
                                     Map.Entry::getValue,
                                     (e1, e2) -> e2,
                                     LinkedHashMap::new));
+            toplist1 = getTopValues(crossingBigramCounts, 10);
+            toplist2 = getTopValues(nonCrossingBigramCounts, 10);
 
         }
 
@@ -102,15 +107,23 @@ public class Task2 {
                 double frequency = (double) charCounts.get(c) / totalChars;
                 writer.write(c + ": " + charCounts.get(c) + " (" + String.format("%.4f", frequency) + ")\n");
             }
+            writer.write("\nTop 10 bigrams with cross:\n");
+            for (int i =0;i<toplist1.size();i++){
+                writer.write(i+1 +" - " +  toplist1.get(i).getKey()+ ": " + toplist1.get(i).getValue() +"\n");
+            }
             writer.write("\nBigram counts with cross:\n");
             for (String bigram : crossingBigramCounts.keySet()) {
                 double frequency = (double) crossingBigramCounts.get(bigram) / (totalChars - 1);
-                writer.write(bigram + ": " +crossingBigramCounts.get(bigram) + " (" + String.format("%.4f", frequency) + ")\n");
+                writer.write(bigram + ": " + crossingBigramCounts.get(bigram) + " (" + String.format("%.4f", frequency) + ")\n");
+            }
+            writer.write("\nTop 10 bigrams without cross:\n");
+            for (int i =0;i<toplist2.size();i++){
+                writer.write(i+1 +" - " +  toplist2.get(i).getKey()+ ": " + toplist2.get(i).getValue() +"\n");
             }
             writer.write("\nBigram counts without cross:\n");
             for (String bigram : nonCrossingBigramCounts.keySet()) {
                 double frequency = (double) nonCrossingBigramCounts.get(bigram) / (totalChars - 1);
-                writer.write(bigram + ": " +nonCrossingBigramCounts.get(bigram) + " (" + String.format("%.4f", frequency) + ")\n");
+                writer.write(bigram + ": " + nonCrossingBigramCounts.get(bigram) + " (" + String.format("%.4f", frequency) + ")\n");
             }
         } catch (IOException e) {
             System.out.println("Error writing output file: " + e.getMessage());
@@ -119,4 +132,25 @@ public class Task2 {
 
         System.out.println("Analysis complete. Results written to " + outputFile);
     }
+
+    public static List<Map.Entry<String, Integer>> getTopValues(Map<String, Integer> map, int count) {
+        // Створення списка і сортування мапи за значеннями в порядку спадання
+        List<Map.Entry<String, Integer>> list =
+                new ArrayList<>(map.entrySet());
+        Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
+            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                return o2.getValue().compareTo(o1.getValue());
+            }
+        });
+
+        // Вибірка n найбільших значень з мапи і зберігання їх у новому списку
+        List<Map.Entry<String, Integer>> topList = new ArrayList<>();
+        for (int i = 0; i < count && i < list.size(); i++) {
+            topList.add(list.get(i));
+        }
+
+        return topList;
+    }
 }
+
+
